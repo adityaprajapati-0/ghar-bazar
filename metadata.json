@@ -1,0 +1,9 @@
+{
+  "name": "GHAR BAZAR - Premium Real Estate Marketplace",
+  "description": "A high-performance real estate platform featuring a mobile-first app-like experience, mandatory role-based entry, and secure verification flows.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera",
+    "microphone"
+  ]
+}
