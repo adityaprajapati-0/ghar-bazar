@@ -376,32 +376,34 @@ const App: React.FC = () => {
           {showNotifications && <NotificationCenter onClose={() => setShowNotifications(false)} isDarkMode={isDarkMode} notifications={notifications} />}
         </AnimatePresence>
 
-        <motion.main key={currentView + role} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex-grow pt-20 pb-24 w-full px-4 md:px-8 lg:px-10 overflow-x-hidden`}>
+        <motion.main key={currentView + role} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex-grow ${currentView === 'property-detail' ? 'pt-0' : 'pt-20'} pb-24 w-full overflow-x-hidden`}>
           {/* BUYER EXPERIENCE */}
           {role === UserRole.BUYER && (
             <>
               {currentView === 'home' && (
-                <DashboardBuyer 
-                  user={user}
-                  properties={filteredProperties}
-                  onPropertyClick={(p) => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }}
-                  likedProperties={user?.likedProperties || []}
-                  onToggleLike={(id) => {
-                    if (!user) return setShowAuthModal(true);
-                    const isLiked = user.likedProperties.includes(id);
-                    const newUser = { ...user, likedProperties: isLiked ? user.likedProperties.filter(pid => pid !== id) : [...user.likedProperties, id] };
-                    setUser(newUser);
-                    localStorage.setItem('user', JSON.stringify(newUser));
-                  }}
-                  onViewMap={() => setCurrentView('map')}
-                  onViewSeller={(sid) => { setViewingUser(users.find(u => u.id === sid) || null); setCurrentView('profile'); }}
-                  onReport={setReportingPropertyId}
-                  filters={filters}
-                  setFilters={setFilters}
-                  translations={t}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
+                <div className="px-4 md:px-8 lg:px-10">
+                  <DashboardBuyer 
+                    user={user}
+                    properties={filteredProperties}
+                    onPropertyClick={(p) => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }}
+                    likedProperties={user?.likedProperties || []}
+                    onToggleLike={(id) => {
+                      if (!user) return setShowAuthModal(true);
+                      const isLiked = user.likedProperties.includes(id);
+                      const newUser = { ...user, likedProperties: isLiked ? user.likedProperties.filter(pid => pid !== id) : [...user.likedProperties, id] };
+                      setUser(newUser);
+                      localStorage.setItem('user', JSON.stringify(newUser));
+                    }}
+                    onViewMap={() => setCurrentView('map')}
+                    onViewSeller={(sid) => { setViewingUser(users.find(u => u.id === sid) || null); setCurrentView('profile'); }}
+                    onReport={setReportingPropertyId}
+                    filters={filters}
+                    setFilters={setFilters}
+                    translations={t}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                  />
+                </div>
               )}
               {currentView === 'map' && <MapView onPropertyClick={(p) => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }} properties={filteredProperties} placeholder={t.search} />}
             </>
@@ -409,7 +411,7 @@ const App: React.FC = () => {
 
           {/* SELLER EXPERIENCE */}
           {role === UserRole.SELLER && (
-            <>
+            <div className="px-4 md:px-8 lg:px-10">
               {currentView === 'home' && (
                 <DashboardSeller 
                   user={user}
@@ -439,21 +441,23 @@ const App: React.FC = () => {
                    </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* ADMIN EXPERIENCE */}
           {role === UserRole.ADMIN && (
-            <AdminDashboard 
-              properties={properties} 
-              users={users} 
-              reports={reports}
-              onVerify={(id, app) => setProperties(prev => prev.map(p => p.id === id ? { ...p, verified: app } : p))} 
-              onOpenProperty={p => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }} 
-              onDeleteProperty={id => setProperties(prev => prev.filter(p => p.id !== id))} 
-              onBanUser={id => setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: !u.isBanned } : u))} 
-              onHandleReport={handleUpdateReportStatus}
-            />
+            <div className="px-4 md:px-8 lg:px-10">
+              <AdminDashboard 
+                properties={properties} 
+                users={users} 
+                reports={reports}
+                onVerify={(id, app) => setProperties(prev => prev.map(p => p.id === id ? { ...p, verified: app } : p))} 
+                onOpenProperty={p => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }} 
+                onDeleteProperty={id => setProperties(prev => prev.filter(p => p.id !== id))} 
+                onBanUser={id => setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: !u.isBanned } : u))} 
+                onHandleReport={handleUpdateReportStatus}
+              />
+            </div>
           )}
 
           {/* PROPERTY DETAIL FULL PAGE */}
@@ -470,16 +474,18 @@ const App: React.FC = () => {
 
           {/* SHARED VIEWS */}
           {currentView === 'profile' && (
-            <ProfilePage 
-              user={viewingUser || user} 
-              isPublicView={!!viewingUser && viewingUser.id !== user?.id}
-              onEdit={u => { setUser(u); localStorage.setItem('user', JSON.stringify(u)); }} 
-              onBack={() => { setViewingUser(null); setCurrentView('home'); }}
-            />
+            <div className="px-4 md:px-8 lg:px-10">
+              <ProfilePage 
+                user={viewingUser || user} 
+                isPublicView={!!viewingUser && viewingUser.id !== user?.id}
+                onEdit={u => { setUser(u); localStorage.setItem('user', JSON.stringify(u)); }} 
+                onBack={() => { setViewingUser(null); setCurrentView('home'); }}
+              />
+            </div>
           )}
           {currentView === 'chat' && <ChatWindow user={user} partner={chatPartner} onClose={() => setCurrentView('home')} translations={t} />}
           {currentView === 'bookings' && (
-            <div className="w-full py-12 px-4">
+            <div className="w-full py-12 px-4 md:px-8 lg:px-10">
               <h1 className="text-4xl font-black mb-10 dark:text-white">{t.bookings}</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {bookings.length > 0 ? bookings.map(b => (
@@ -503,18 +509,20 @@ const App: React.FC = () => {
           )}
           {currentView === 'add-property' && <ListingWizard onComplete={p => { setProperties(prev => [{ ...p, ownerId: user?.id || 'anon', verified: false }, ...prev]); setCurrentView('home'); }} />}
           {currentView === 'settings' && (
-            <SettingsMenu 
-              role={role}
-              onClose={() => setCurrentView('home')} 
-              isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-              highContrast={highContrast} onToggleContrast={() => setHighContrast(!highContrast)}
-              allowNotifications={allowNotifications} onToggleNotifications={() => setAllowNotifications(!allowNotifications)}
-              privacyMode={privacyMode} onTogglePrivacy={() => setPrivacyMode(!privacyMode)}
-              twoFactor={twoFactor} onToggleTwoFactor={() => setTwoFactor(!twoFactor)}
-              onOpenOrders={() => setCurrentView('bookings')}
-              language={language}
-              onSetLanguage={setLanguage}
-            />
+            <div className="px-4 md:px-8 lg:px-10">
+              <SettingsMenu 
+                role={role}
+                onClose={() => setCurrentView('home')} 
+                isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+                highContrast={highContrast} onToggleContrast={() => setHighContrast(!highContrast)}
+                allowNotifications={allowNotifications} onToggleNotifications={() => setAllowNotifications(!allowNotifications)}
+                privacyMode={privacyMode} onTogglePrivacy={() => setPrivacyMode(!privacyMode)}
+                twoFactor={twoFactor} onToggleTwoFactor={() => setTwoFactor(!twoFactor)}
+                onOpenOrders={() => setCurrentView('bookings')}
+                language={language}
+                onSetLanguage={setLanguage}
+              />
+            </div>
           )}
         </motion.main>
 
