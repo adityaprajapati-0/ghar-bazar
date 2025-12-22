@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { UserRole, Property, UserProfile, Review, ChatSession, Message, Report } from './types';
 import LandingGatekeeper from './components/LandingGatekeeper';
@@ -17,7 +16,10 @@ import NotificationCenter from './components/NotificationCenter';
 import AdminDashboard from './components/AdminDashboard';
 import ChatWindow from './components/ChatWindow';
 import ReportModal from './components/ReportModal';
+import PropertyManagementConsole from './components/PropertyManagementConsole';
+import ChatbotModal from './components/ChatbotModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import { MessageSquare, Sparkles, X } from 'lucide-react';
 
 const MOCK_USERS: UserProfile[] = [
   {
@@ -59,6 +61,7 @@ const INITIAL_PROPERTIES: Property[] = [
     images: ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800'],
     coordinates: { lat: 18.9986, lng: 72.8174 },
     ownerId: 'owner_1',
+    ownerName: 'Rajesh Malhotra',
     reviews: [{ id: 'rev1', authorName: 'Suresh Raina', rating: 5, comment: 'Absolutely stunning views and top-notch amenities.', date: 'Oct 12, 2023' }],
     verified: true,
     featured: true
@@ -79,6 +82,7 @@ const INITIAL_PROPERTIES: Property[] = [
     images: ['https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&q=80&w=800'],
     coordinates: { lat: 26.9124, lng: 75.7873 },
     ownerId: 'owner_2',
+    ownerName: 'Priya Kapoor',
     reviews: [],
     verified: true,
     featured: false
@@ -96,6 +100,7 @@ const INITIAL_PROPERTIES: Property[] = [
     images: [],
     coordinates: { lat: 19.1075, lng: 72.8263 },
     ownerId: 'owner_1',
+    ownerName: 'Rajesh Malhotra',
     reviews: [],
     verified: true,
     featured: true
@@ -113,6 +118,7 @@ const INITIAL_PROPERTIES: Property[] = [
     images: [],
     coordinates: { lat: 18.7544, lng: 73.4062 },
     ownerId: 'owner_2',
+    ownerName: 'Priya Kapoor',
     reviews: [],
     verified: true,
     featured: false
@@ -130,6 +136,7 @@ const INITIAL_PROPERTIES: Property[] = [
     images: [],
     coordinates: { lat: 12.9698, lng: 77.7500 },
     ownerId: 'owner_1',
+    ownerName: 'Rajesh Malhotra',
     reviews: [],
     verified: true,
     featured: true
@@ -147,6 +154,7 @@ const INITIAL_PROPERTIES: Property[] = [
     images: [],
     coordinates: { lat: 30.9013, lng: 76.9649 },
     ownerId: 'owner_2',
+    ownerName: 'Priya Kapoor',
     reviews: [],
     verified: true,
     featured: false
@@ -206,10 +214,12 @@ const App: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [currentView, setCurrentView] = useState<string>('home');
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [managementPropertyId, setManagementPropertyId] = useState<string | null>(null);
   const [reportingPropertyId, setReportingPropertyId] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [viewingUser, setViewingUser] = useState<UserProfile | null>(null);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -233,6 +243,13 @@ const App: React.FC = () => {
     furnishing: 'Any'
   });
 
+  const handleLogout = useCallback(() => {
+    setRole(UserRole.NONE);
+    setUser(null);
+    localStorage.clear();
+    setCurrentView('home');
+  }, []);
+
   useEffect(() => {
     const savedRole = localStorage.getItem('role') as UserRole;
     if (savedRole) setRole(savedRole);
@@ -254,7 +271,7 @@ const App: React.FC = () => {
     else root.classList.remove('dark');
     
     if (highContrast) root.classList.add('contrast-high');
-    else root.classList.remove('contrast-high');
+    else root.classList.remove('high-contrast');
     
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     localStorage.setItem('highContrast', highContrast.toString());
@@ -270,6 +287,32 @@ const App: React.FC = () => {
     setShowNotifications(true);
     setTimeout(() => setShowNotifications(false), 4000);
   }, [allowNotifications]);
+
+  const handleAdminVerifyProperty = useCallback((id: string, approved: boolean) => {
+    const propertyToVerify = properties.find(p => p.id === id);
+    if (!propertyToVerify) return;
+
+    if (approved) {
+      setProperties(prev => prev.map(p => p.id === id ? { ...p, verified: true } : p));
+      addNotification(
+        'Listing Approved!', 
+        `Your property "${propertyToVerify.title}" has been verified and is now live.`, 
+        'success'
+      );
+    } else {
+      setProperties(prev => prev.filter(p => p.id !== id));
+      addNotification(
+        'Listing Rejected', 
+        `Your submission for "${propertyToVerify.title}" was not approved. Please review our marketplace guidelines.`, 
+        'alert'
+      );
+    }
+  }, [properties, addNotification]);
+
+  const handleUpdateProperty = useCallback((updated: Property) => {
+    setProperties(prev => prev.map(p => p.id === updated.id ? updated : p));
+    addNotification('Listing Updated', `Changes to "${updated.title}" have been synced.`, 'success');
+  }, [addNotification]);
 
   const handleRoleSelection = (selectedRole: UserRole) => {
     setRole(selectedRole);
@@ -347,11 +390,17 @@ const App: React.FC = () => {
     });
   }, [properties, filters, role, user, searchQuery]);
 
+  const liveProperties = useMemo(() => properties.filter(p => p.verified), [properties]);
+  const pendingProperties = useMemo(() => properties.filter(p => !p.verified), [properties]);
   const sellerProperties = useMemo(() => properties.filter(p => p.ownerId === user?.id), [properties, user]);
 
   const activeProperty = useMemo(() => 
     selectedPropertyId ? properties.find(p => p.id === selectedPropertyId) : null
   , [selectedPropertyId, properties]);
+
+  const managementProperty = useMemo(() => 
+    managementPropertyId ? properties.find(p => p.id === managementPropertyId) : null
+  , [managementPropertyId, properties]);
 
   return (
     <div className={`min-h-screen flex flex-col transition-all duration-700 ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} ${highContrast ? 'contrast-high' : ''}`}>
@@ -363,7 +412,7 @@ const App: React.FC = () => {
         <Header 
           role={role} 
           user={user} 
-          onLogout={() => { setRole(UserRole.NONE); setUser(null); localStorage.clear(); setCurrentView('home'); }} 
+          onLogout={handleLogout} 
           onOpenSettings={() => setCurrentView('settings')}
           onOpenNotifications={() => setShowNotifications(!showNotifications)}
           onSearchClick={() => setCurrentView(role === UserRole.BUYER ? 'home' : 'inventory')}
@@ -394,6 +443,15 @@ const App: React.FC = () => {
                       setUser(newUser);
                       localStorage.setItem('user', JSON.stringify(newUser));
                     }}
+                    savedProperties={user?.savedProperties || []}
+                    onToggleSave={(id) => {
+                      if (!user) return setShowAuthModal(true);
+                      const isSaved = user.savedProperties.includes(id);
+                      const newUser = { ...user, savedProperties: isSaved ? user.savedProperties.filter(pid => pid !== id) : [...user.savedProperties, id] };
+                      setUser(newUser);
+                      localStorage.setItem('user', JSON.stringify(newUser));
+                      addNotification(isSaved ? 'Property Removed' : 'Property Saved', isSaved ? 'Listing removed from your collection.' : 'Listing added to your saved collection.', 'success');
+                    }}
                     onViewMap={() => setCurrentView('map')}
                     onViewSeller={(sid) => { setViewingUser(users.find(u => u.id === sid) || null); setCurrentView('profile'); }}
                     onReport={setReportingPropertyId}
@@ -417,7 +475,14 @@ const App: React.FC = () => {
                   user={user}
                   properties={sellerProperties}
                   onAddProperty={() => setCurrentView('add-property')}
-                  onPropertyClick={(p) => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }}
+                  onPropertyClick={(p) => { 
+                    if (p.verified) {
+                      setManagementPropertyId(p.id);
+                    } else {
+                      setSelectedPropertyId(p.id); 
+                      setCurrentView('property-detail');
+                    }
+                  }}
                   translations={t}
                 />
               )}
@@ -434,7 +499,19 @@ const App: React.FC = () => {
                             <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest ${p.verified ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                               {p.verified ? 'Marketplace Ready' : 'In Review'}
                             </span>
-                            <button onClick={() => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }} className="text-indigo-600 font-black uppercase text-[10px] tracking-widest hover:translate-x-1 transition-transform">Edit Console →</button>
+                            <button 
+                              onClick={() => { 
+                                if (p.verified) {
+                                  setManagementPropertyId(p.id);
+                                } else {
+                                  setSelectedPropertyId(p.id); 
+                                  setCurrentView('property-detail');
+                                }
+                              }} 
+                              className="text-indigo-600 font-black uppercase text-[10px] tracking-widest hover:translate-x-1 transition-transform"
+                            >
+                              {p.verified ? 'Manage Console →' : 'View Preview →'}
+                            </button>
                           </div>
                        </div>
                      ))}
@@ -451,7 +528,7 @@ const App: React.FC = () => {
                 properties={properties} 
                 users={users} 
                 reports={reports}
-                onVerify={(id, app) => setProperties(prev => prev.map(p => p.id === id ? { ...p, verified: app } : p))} 
+                onVerify={handleAdminVerifyProperty} 
                 onOpenProperty={p => { setSelectedPropertyId(p.id); setCurrentView('property-detail'); }} 
                 onDeleteProperty={id => setProperties(prev => prev.filter(p => p.id !== id))} 
                 onBanUser={id => setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: !u.isBanned } : u))} 
@@ -460,7 +537,7 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* PROPERTY DETAIL FULL PAGE */}
+          {/* SHARED VIEWS */}
           {currentView === 'property-detail' && activeProperty && (
             <PropertyDetail 
               property={activeProperty} 
@@ -472,7 +549,6 @@ const App: React.FC = () => {
             />
           )}
 
-          {/* SHARED VIEWS */}
           {currentView === 'profile' && (
             <div className="px-4 md:px-8 lg:px-10">
               <ProfilePage 
@@ -480,6 +556,7 @@ const App: React.FC = () => {
                 isPublicView={!!viewingUser && viewingUser.id !== user?.id}
                 onEdit={u => { setUser(u); localStorage.setItem('user', JSON.stringify(u)); }} 
                 onBack={() => { setViewingUser(null); setCurrentView('home'); }}
+                onLogout={handleLogout}
               />
             </div>
           )}
@@ -516,11 +593,13 @@ const App: React.FC = () => {
                 isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
                 highContrast={highContrast} onToggleContrast={() => setHighContrast(!highContrast)}
                 allowNotifications={allowNotifications} onToggleNotifications={() => setAllowNotifications(!allowNotifications)}
+                /* DO FIX: Fixed the typo setTogglePrivacy -> setPrivacyMode to match the defined state setter */
                 privacyMode={privacyMode} onTogglePrivacy={() => setPrivacyMode(!privacyMode)}
                 twoFactor={twoFactor} onToggleTwoFactor={() => setTwoFactor(!twoFactor)}
                 onOpenOrders={() => setCurrentView('bookings')}
                 language={language}
                 onSetLanguage={setLanguage}
+                onLogout={handleLogout}
               />
             </div>
           )}
@@ -529,6 +608,13 @@ const App: React.FC = () => {
         <AnimatePresence>
           {showAuthModal && <AuthModal onCancel={() => setShowAuthModal(false)} onSuccess={handleAuthSuccess} role={role} />}
           {reportingPropertyId && <ReportModal propertyId={reportingPropertyId} onCancel={() => setReportingPropertyId(null)} onSubmit={handleSubmitReport} />}
+          {managementProperty && (
+            <PropertyManagementConsole 
+              property={managementProperty} 
+              onClose={() => setManagementPropertyId(null)} 
+              onUpdate={handleUpdateProperty} 
+            />
+          )}
           {showPaymentModal && <PaymentModal onClose={() => setShowPaymentModal(false)} onComplete={() => {
             const property = properties.find(p => p.id === selectedPropertyId);
             if (property) {
@@ -539,7 +625,34 @@ const App: React.FC = () => {
             setSelectedPropertyId(null);
             setCurrentView('bookings');
           }} />}
+          {showChatbot && (
+            <ChatbotModal 
+              onClose={() => setShowChatbot(false)} 
+              isDarkMode={isDarkMode} 
+              liveProperties={liveProperties}
+              pendingProperties={pendingProperties}
+              user={user}
+              currentView={currentView}
+              activeProperty={activeProperty}
+            />
+          )}
         </AnimatePresence>
+
+        {/* Floating Chatbot FAB - Strict Fixed Position Above All Layers */}
+        {role !== UserRole.NONE && (
+          <motion.button
+            whileHover={{ scale: 1.1, y: -5 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowChatbot(!showChatbot)}
+            className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-[200] w-16 h-16 bg-indigo-600 text-white rounded-[2rem] shadow-[0_15px_40px_-5px_rgba(79,70,229,0.5)] flex items-center justify-center group overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-700 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10">
+              <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-amber-300 animate-pulse" />
+              {showChatbot ? <X size={28} /> : <MessageSquare size={28} />}
+            </div>
+          </motion.button>
+        )}
 
         <MobileNavBar activeTab={currentView} onTabChange={(tab) => { setCurrentView(tab); if (tab !== 'profile') setViewingUser(null); }} role={role} />
       </div>

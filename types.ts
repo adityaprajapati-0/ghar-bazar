@@ -45,6 +45,8 @@ export interface Property {
   id: string;
   title: string;
   price: number;
+  originalPrice?: number;
+  description?: string;
   location: string;
   type: 'Apartment' | 'Villa' | 'Warehouse' | 'Plot' | 'Land';
   beds?: number;
@@ -59,6 +61,7 @@ export interface Property {
   featured: boolean;
   coordinates: { lat: number; lng: number };
   ownerId: string;
+  ownerName?: string;
   reviews: Review[];
   reported?: boolean;
   legalDocs?: {

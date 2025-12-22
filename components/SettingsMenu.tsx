@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Moon, Shield, Lock, Accessibility, Sun, ChevronRight, Languages, BellRing, Package, EyeOff, ArrowLeft, Key, Smartphone, Fingerprint, RefreshCcw, Check, UserCircle, Plus, Trash2, Settings, Landmark, UserPlus, Briefcase } from 'lucide-react';
+import { X, Moon, Shield, Lock, Accessibility, Sun, ChevronRight, Languages, BellRing, Package, EyeOff, ArrowLeft, Key, Smartphone, Fingerprint, RefreshCcw, Check, UserCircle, Plus, Trash2, Settings, Landmark, UserPlus, Briefcase, LogOut } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface Props {
@@ -20,6 +19,7 @@ interface Props {
   onOpenOrders: () => void;
   language: string;
   onSetLanguage: (lang: string) => void;
+  onLogout: () => void;
 }
 
 type SubmenuView = 'main' | 'vault' | '2fa' | 'language';
@@ -27,7 +27,7 @@ type SubmenuView = 'main' | 'vault' | '2fa' | 'language';
 const SettingsMenu: React.FC<Props> = ({ 
   role, onClose, isDarkMode, onToggleDarkMode, highContrast, onToggleContrast,
   allowNotifications, onToggleNotifications, privacyMode, onTogglePrivacy,
-  twoFactor, onToggleTwoFactor, onOpenOrders, language, onSetLanguage
+  twoFactor, onToggleTwoFactor, onOpenOrders, language, onSetLanguage, onLogout
 }) => {
   const [activeView, setActiveView] = useState<SubmenuView>('main');
   const [vaultCode, setVaultCode] = useState('');
@@ -113,9 +113,28 @@ const SettingsMenu: React.FC<Props> = ({
             <div>
               <div className="flex items-center gap-6 mb-10"><h3 className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-[0.4em] whitespace-nowrap">Privacy & Safety</h3><div className="h-[2px] bg-slate-100 dark:bg-slate-800 flex-grow rounded-full"></div></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                /* DO FIX: Added Privacy Mode toggle to use the passed prop correctly */
+                <SettingItem icon={EyeOff} label="Privacy Mode" desc={privacyMode ? 'Enhanced anonymity active' : 'Standard marketplace presence'} toggle value={privacyMode} action={onTogglePrivacy} />
                 <SettingItem icon={Shield} label="Privacy Vault" desc="Secure property documents" action={() => setActiveView('vault')} />
                 <SettingItem icon={Lock} label="Two-Factor Auth" desc={twoFactor ? 'Active' : 'Enable OTP Layer'} toggle value={twoFactor} action={onToggleTwoFactor} />
               </div>
+            </div>
+
+            {/* Exit Section */}
+            <div>
+              <div className="flex items-center gap-6 mb-10"><h3 className="text-[10px] font-black uppercase text-rose-600 tracking-[0.4em] whitespace-nowrap">Session Management</h3><div className="h-[2px] bg-slate-100 dark:bg-slate-800 flex-grow rounded-full"></div></div>
+              <button 
+                onClick={onLogout}
+                className="w-full p-10 bg-rose-50 dark:bg-rose-950/20 rounded-[3.5rem] border border-rose-100 dark:border-rose-900/50 flex items-center gap-10 cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 transition-all duration-500 group"
+              >
+                <div className="w-20 h-20 bg-rose-600 text-white rounded-3xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-all shadow-xl shadow-rose-200 dark:shadow-none">
+                  <LogOut size={36} />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-black text-2xl mb-1.5 text-rose-600">Terminate Session</h4>
+                  <p className="text-rose-400 font-bold uppercase tracking-widest text-[9px] leading-relaxed">Logout from all active devices</p>
+                </div>
+              </button>
             </div>
           </motion.div>
         )}

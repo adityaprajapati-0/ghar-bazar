@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Property, UserRole } from '../types';
-import { Building, Plus, TrendingUp, Users, Eye, ArrowUpRight, BarChart3, ShieldCheck, ChevronUp } from 'lucide-react';
+import { Building, Plus, TrendingUp, Users, Eye, ArrowUpRight, BarChart3, ShieldCheck, ChevronUp, Settings2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Props {
@@ -48,7 +48,7 @@ const DashboardSeller: React.FC<Props> = ({ user, properties, onAddProperty, onP
       </div>
 
       <div className="space-y-12 w-full">
-        {/* Active Inventory Grid: 1 Mob / 2 Tab / 3 PC */}
+        {/* Active Inventory Grid */}
         <div className="space-y-8">
            <div className="flex items-center gap-4 px-2">
               <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
@@ -65,10 +65,15 @@ const DashboardSeller: React.FC<Props> = ({ user, properties, onAddProperty, onP
                <div key={p.id} onClick={() => onPropertyClick(p)} className="bg-white dark:bg-slate-950 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 flex flex-col cursor-pointer group hover:border-indigo-500/50 transition-all shadow-sm w-full">
                   <div className="relative w-full h-56 mb-6 overflow-hidden rounded-[1.5rem] shadow-md">
                     <img src={p.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
                       <span className={`text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg ${p.verified ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
                         {p.verified ? 'Marketplace Ready' : 'Pending Review'}
                       </span>
+                      {p.originalPrice && p.originalPrice > p.price && (
+                        <span className="bg-amber-500 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg">
+                          Discount Active
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex-grow">
@@ -77,11 +82,11 @@ const DashboardSeller: React.FC<Props> = ({ user, properties, onAddProperty, onP
                   </div>
                   <div className="mt-8 flex justify-between items-center pt-6 border-t border-slate-100 dark:border-slate-900">
                      <div>
-                       <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Valuation</p>
-                       <p className="text-xl font-black text-indigo-600 tracking-tighter">₹{(p.price / 100000).toFixed(0)} L+</p>
+                       <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Asset Valuation</p>
+                       <p className="text-xl font-black text-indigo-600 tracking-tighter">₹{p.price.toLocaleString()}</p>
                      </div>
                      <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                        <ArrowUpRight size={24} />
+                        {p.verified ? <Settings2 size={24} /> : <ArrowUpRight size={24} />}
                      </div>
                   </div>
                </div>
@@ -93,8 +98,7 @@ const DashboardSeller: React.FC<Props> = ({ user, properties, onAddProperty, onP
              )}
            </div>
         </div>
-
-        {/* Action Banner */}
+        {/* ... action banner ... */}
         <div className="w-full">
            <div className="bg-indigo-600 rounded-[3rem] p-12 md:p-16 text-white shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl group-hover:scale-125 transition-transform duration-1000" />
@@ -103,17 +107,16 @@ const DashboardSeller: React.FC<Props> = ({ user, properties, onAddProperty, onP
                   <TrendingUp size={48} className="mb-6 opacity-30" />
                   <h4 className="text-4xl md:text-5xl font-black mb-4 leading-none tracking-tighter">Optimize Your Liquidity</h4>
                   <p className="text-indigo-100 text-base font-medium opacity-80">
-                    High-end listings in your region are currently fetching 12% premium. Our AI suggests updating your descriptions to match active demand.
+                    High-end listings in your region are currently fetching 12% premium. Use the Manage Console to apply strategic discounts and refresh your media.
                   </p>
                 </div>
                 <button className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest px-10 py-5 bg-white text-indigo-600 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl">
-                  Run Diagnostics <BarChart3 size={18} />
+                  Run Portfolio Health <BarChart3 size={18} />
                 </button>
               </div>
            </div>
         </div>
       </div>
-
       <button 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="fixed bottom-24 right-6 z-[60] w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-600/30 hover:scale-110 active:scale-95 transition-all md:bottom-8"

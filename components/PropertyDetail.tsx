@@ -7,7 +7,7 @@ import {
   ShieldCheck, CheckCircle2, Star, Send, ArrowLeft, Ruler, 
   Layout, Sofa, ShieldAlert, Navigation, Info, Compass, 
   IndianRupee, Home, Map as MapIcon, Share2, Printer, 
-  FileText, ArrowRight, Wallet, TrendingUp, ChevronLeft
+  FileText, ArrowRight, Wallet, TrendingUp, ChevronLeft, Tag
 } from 'lucide-react';
 import Footer from './Footer';
 
@@ -61,6 +61,8 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
     }, 800);
   };
 
+  const hasDiscount = property.originalPrice && property.originalPrice > property.price;
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -111,6 +113,11 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                        <ShieldCheck size={14} /> Verified
                      </span>
                    )}
+                   {hasDiscount && (
+                     <span className="bg-amber-500/90 backdrop-blur-md text-white text-[8px] md:text-[9px] font-black px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow-xl flex items-center gap-2 uppercase tracking-widest border border-white/10">
+                       <Tag size={14} /> Flash Discount
+                     </span>
+                   )}
                 </div>
               </div>
               <div className="grid grid-cols-4 gap-2 md:gap-4">
@@ -127,7 +134,7 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
               </div>
             </div>
 
-            {/* Core Info Bar - Adjusted size for devices */}
+            {/* Core Info Bar */}
             <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
                <div className="space-y-1 max-w-full">
                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-black dark:text-white tracking-tighter uppercase leading-none break-words">
@@ -143,6 +150,11 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                     <p className="text-2xl md:text-3xl lg:text-4xl font-black text-indigo-600 tracking-tighter leading-none">
                       {formatPrice(property.price)}
                     </p>
+                    {hasDiscount && (
+                      <p className="text-[9px] text-rose-500 font-black line-through opacity-60">
+                        {formatPrice(property.originalPrice!)}
+                      </p>
+                    )}
                     <p className="text-[8px] md:text-[9px] font-black uppercase text-slate-400 tracking-widest mt-1.5 md:mt-2">Price Value</p>
                   </div>
                   <div className="h-10 md:h-12 w-px bg-slate-100 dark:bg-slate-800"></div>
@@ -194,9 +206,7 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                          <div className="space-y-4">
                             <h4 className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Professional Overview</h4>
                             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                              This premium {property.type} at {property.location} represents a pinnacle of luxury living. Designed with high-performance architectural standards, 
-                              the space offers expansive cross-ventilation, premium Italian marble flooring, and state-of-the-art climate control. 
-                              Ideal for HNIs and luxury investors seeking a high-yield asset in a prime corridor.
+                              {property.description || `This premium ${property.type} at ${property.location} represents a pinnacle of luxury living. Designed with high-performance architectural standards, the space offers expansive cross-ventilation, premium Italian marble flooring, and state-of-the-art climate control. Ideal for HNIs and luxury investors seeking a high-yield asset in a prime corridor.`}
                             </p>
                          </div>
 
@@ -205,16 +215,15 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                             <div className="aspect-[21/9] w-full bg-slate-50 dark:bg-slate-800/50 rounded-2xl md:rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center group cursor-zoom-in">
                                <div className="text-center">
                                   <Layout className="mx-auto mb-4 text-slate-300 group-hover:text-indigo-600 transition-colors" size={32} />
-                                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 px-4">Interactive 3D Layout Preview</p>
+                                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 px-4">Interactive 3D Layout Preview {property.dimensions ? `(${property.dimensions})` : ''}</p>
                                </div>
                             </div>
                          </div>
                       </motion.div>
                     )}
-
+                    {/* ... other tabs remain the same ... */}
                     {activeTab === 'neighborhood' && (
                       <motion.div key="neighborhood" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 md:space-y-10">
-                         {/* Stylized Mock Map View */}
                          <div className="aspect-video w-full bg-[#e3e7f0] dark:bg-slate-950 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden border border-slate-100 dark:border-slate-800">
                             <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #4f46e5 1.5px, transparent 0)', backgroundSize: '40px 40px' }} />
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -222,11 +231,10 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                                   <MapPin size={20} className="text-white" />
                                </motion.div>
                                <div className="mt-4 px-3 py-1.5 md:px-4 md:py-2 bg-white rounded-xl shadow-xl border border-slate-100 text-[8px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-                                  Your New Asset
+                                  {property.title}
                                </div>
                             </div>
                          </div>
-
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                             <div className="space-y-4">
                                <h4 className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
@@ -257,7 +265,6 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                          </div>
                       </motion.div>
                     )}
-
                     {activeTab === 'reviews' && (
                       <motion.div key="reviews" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 md:space-y-10">
                          {user && (
@@ -315,14 +322,11 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                </div>
             </div>
           </div>
-
-          {/* Right Sticky Sidebar Column */}
+          {/* ... sidebar ... */}
           <div className="lg:col-span-4 space-y-6 md:space-y-8">
             <div className="lg:sticky lg:top-24 space-y-6 md:space-y-8">
-               {/* Contact Card */}
                <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-100 dark:border-slate-800">
                   <h4 className="text-base md:text-lg font-black dark:text-white uppercase tracking-tighter mb-6 md:mb-8">Acquisition Desk</h4>
-                  
                   <div className="space-y-4 md:space-y-6 mb-8 md:mb-10">
                     <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-700">
                        <div className="flex items-center gap-3">
@@ -339,22 +343,14 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                        <span className="text-xs font-black dark:text-white shrink-0">~ 5% Plus Fees</span>
                     </div>
                   </div>
-
                   <div className="space-y-3 md:space-y-4">
-                    <button 
-                      onClick={onPaymentRequired}
-                      className="w-full py-4 md:py-5 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 hover:scale-[1.02] active:scale-95 transition-all"
-                    >
+                    <button onClick={onPaymentRequired} className="w-full py-4 md:py-5 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 hover:scale-[1.02] active:scale-95 transition-all">
                       <Phone size={18} /> Schedule Visit
                     </button>
-                    <button 
-                      onClick={onChatRequired}
-                      className="w-full py-4 md:py-5 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center gap-3 border-2 border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all active:scale-95"
-                    >
+                    <button onClick={onChatRequired} className="w-full py-4 md:py-5 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center gap-3 border-2 border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all active:scale-95">
                       <MessageCircle size={18} /> Message Agent
                     </button>
                   </div>
-
                   <div className="mt-8 pt-6 md:pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center gap-4">
                      <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden shadow-inner shrink-0">
                         <img src="https://i.pravatar.cc/150?u=agent" className="w-full h-full object-cover" />
@@ -365,8 +361,6 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
                      </div>
                   </div>
                </div>
-
-               {/* Safety Tips Card */}
                <div className="bg-amber-50 dark:bg-amber-900/20 p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-amber-100 dark:border-amber-900/30">
                   <div className="flex items-center gap-3 mb-4">
                      <ShieldAlert size={20} className="text-amber-600 shrink-0" />
@@ -387,22 +381,12 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
           </div>
         </div>
       </div>
-
-      {/* Full Page Footer only on Card Page */}
       <Footer />
-
-      {/* Sticky Mobile Action Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 md:p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 z-[70] flex gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        <button 
-          onClick={onPaymentRequired}
-          className="flex-grow py-3.5 md:py-4 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95 transition-all"
-        >
+        <button onClick={onPaymentRequired} className="flex-grow py-3.5 md:py-4 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95 transition-all">
           <Phone size={16} /> Call Agent
         </button>
-        <button 
-          onClick={onChatRequired}
-          className="w-12 h-12 md:w-14 md:h-14 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 rounded-xl md:rounded-2xl flex items-center justify-center border border-emerald-100 dark:border-emerald-800 shadow-sm active:scale-95 transition-all"
-        >
+        <button onClick={onChatRequired} className="w-12 h-12 md:w-14 md:h-14 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 rounded-xl md:rounded-2xl flex items-center justify-center border border-emerald-100 dark:border-emerald-800 shadow-sm active:scale-95 transition-all">
           <MessageCircle size={22} />
         </button>
       </div>
@@ -410,7 +394,6 @@ const PropertyDetail: React.FC<Props> = ({ property, onClose, onPaymentRequired,
   );
 };
 
-// Internal icons helper
 const ImageIcon = ({ size }: { size: number }) => <Layout size={size} />;
 const UserCircleIcon = ({ size, className }: { size: number, className?: string }) => <Layout size={size} className={className} />;
 

@@ -10,9 +10,10 @@ interface Props {
   currentTab?: string;
   isPublicView?: boolean;
   onBack?: () => void;
+  onLogout?: () => void;
 }
 
-const ProfilePage: React.FC<Props> = ({ user, onEdit, currentTab = 'listings', isPublicView = false, onBack }) => {
+const ProfilePage: React.FC<Props> = ({ user, onEdit, currentTab = 'listings', isPublicView = false, onBack, onLogout }) => {
   const [tab, setTab] = useState(currentTab);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(user?.name || '');
@@ -117,14 +118,22 @@ const ProfilePage: React.FC<Props> = ({ user, onEdit, currentTab = 'listings', i
             </div>
 
             {!isPublicView && (
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button 
                   onClick={isEditing ? handleSave : () => setIsEditing(true)}
-                  className={`px-10 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] flex items-center gap-3 shadow-2xl transition-all active:scale-95 ${isEditing ? 'bg-emerald-600 text-white shadow-emerald-200' : 'bg-gray-900 dark:bg-indigo-600 text-white shadow-indigo-100 dark:shadow-none'}`}
+                  className={`px-10 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-2xl transition-all active:scale-95 ${isEditing ? 'bg-emerald-600 text-white shadow-emerald-200' : 'bg-gray-900 dark:bg-indigo-600 text-white shadow-indigo-100 dark:shadow-none'}`}
                 >
                   {isEditing ? <Check size={20} /> : <Edit3 size={18} />}
                   {isEditing ? 'Sync Changes' : 'Edit Profile'}
                 </button>
+                {!isEditing && onLogout && (
+                  <button 
+                    onClick={onLogout}
+                    className="px-6 py-5 rounded-[2rem] bg-rose-50 dark:bg-rose-950/20 text-rose-600 border border-rose-100 dark:border-rose-900/50 font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl hover:bg-rose-600 hover:text-white transition-all active:scale-95"
+                  >
+                    <LogOut size={18} /> Logout
+                  </button>
+                )}
               </div>
             )}
           </div>

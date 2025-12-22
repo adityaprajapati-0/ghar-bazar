@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Property, UserProfile, UserRole, Report } from '../types';
-import { ShieldCheck, FileText, Check, X, ExternalLink, Clock, AlertTriangle, Users, LayoutDashboard, Trash2, Ban, UserCheck, Search, MapPin, MessageSquare, Reply } from 'lucide-react';
+import { ShieldCheck, FileText, Check, X, ExternalLink, Clock, AlertTriangle, Users, LayoutDashboard, Trash2, Ban, UserCheck, Search, MapPin, MessageSquare, Reply, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface Props {
   properties: Property[];
@@ -82,15 +82,15 @@ const AdminDashboard: React.FC<Props> = ({ properties, users, reports, onVerify,
                       <div className="flex items-center gap-4">
                         <button 
                           onClick={() => onVerify(p.id, true)} 
-                          className="px-10 py-5 bg-emerald-500 text-white rounded-[1.5rem] font-black uppercase text-[11px] tracking-widest hover:bg-emerald-600 shadow-xl shadow-emerald-100 dark:shadow-none transition-all active:scale-95 flex items-center gap-3"
+                          className="px-8 py-5 bg-emerald-500 text-white rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest hover:bg-emerald-600 shadow-xl shadow-emerald-100 dark:shadow-none transition-all active:scale-95 flex items-center gap-3"
                         >
-                          <Check size={20}/> Approve Listing
+                          <ThumbsUp size={18}/> Approve Asset
                         </button>
                         <button 
-                          onClick={() => onVerify(p.id, false)} 
-                          className="w-16 h-16 bg-rose-50 text-rose-500 rounded-[1.5rem] flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all duration-300"
+                          onClick={() => { if(confirm('Are you sure you want to reject and remove this listing?')) onVerify(p.id, false); }} 
+                          className="px-8 py-5 bg-rose-50 text-rose-500 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest hover:bg-rose-500 hover:text-white transition-all duration-300 flex items-center gap-3 shadow-xl shadow-rose-100 dark:shadow-none"
                         >
-                          <X size={24}/>
+                          <ThumbsDown size={18}/> Reject Request
                         </button>
                       </div>
                     </div>

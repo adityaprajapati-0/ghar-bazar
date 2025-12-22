@@ -11,6 +11,8 @@ interface Props {
   onPropertyClick: (p: Property) => void;
   likedProperties: string[];
   onToggleLike: (id: string) => void;
+  savedProperties: string[];
+  onToggleSave: (id: string) => void;
   onViewMap: () => void;
   onViewSeller: (sid: string) => void;
   onReport: (id: string) => void;
@@ -22,7 +24,8 @@ interface Props {
 }
 
 const DashboardBuyer: React.FC<Props> = ({ 
-  user, properties, onPropertyClick, likedProperties, onToggleLike, onViewMap, onReport, filters, setFilters, translations, searchQuery, onSearchChange 
+  // Fixed: Destructured onViewSeller from props to resolve reference errors
+  user, properties, onPropertyClick, likedProperties, onToggleLike, savedProperties, onToggleSave, onViewMap, onViewSeller, onReport, filters, setFilters, translations, searchQuery, onSearchChange 
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -169,11 +172,12 @@ const DashboardBuyer: React.FC<Props> = ({
                 role={UserRole.BUYER} 
                 onAction={() => onPropertyClick(p)} 
                 isLiked={likedProperties.includes(p.id)} 
-                isSaved={false} 
+                isSaved={savedProperties.includes(p.id)} 
                 onToggleLike={() => onToggleLike(p.id)} 
-                onToggleSave={() => {}} 
+                onToggleSave={() => onToggleSave(p.id)} 
                 onViewMap={onViewMap} 
                 onReport={onReport}
+                onViewSellerProfile={onViewSeller}
               />
             ))}
           </motion.div>
@@ -207,11 +211,12 @@ const DashboardBuyer: React.FC<Props> = ({
               role={UserRole.BUYER} 
               onAction={() => onPropertyClick(p)} 
               isLiked={likedProperties.includes(p.id)} 
-              isSaved={false} 
+              isSaved={savedProperties.includes(p.id)} 
               onToggleLike={() => onToggleLike(p.id)} 
-              onToggleSave={() => {}} 
+              onToggleSave={() => onToggleSave(p.id)} 
               onViewMap={onViewMap} 
               onReport={onReport}
+              onViewSellerProfile={onViewSeller}
             />
           )) : (
             <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900/50 rounded-[2rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
